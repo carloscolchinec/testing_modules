@@ -114,7 +114,7 @@
 
   <script src="https://unpkg.com/quagga"></script>
   <script>
-   var scannedCodes = [];
+var scannedCodes = [];
 var consecutiveCount = 0;
 var currentCode = null;
 
@@ -132,8 +132,8 @@ Quagga.init(
       readers: ["ean_reader", "codabar_reader"],
       multiple: false,
       multipleFrequency: 1, // Reduce la frecuencia de lectura para obtener resultados más rápidos
-      locate: true,
-      patchSize: "medium"
+      locate: false, // Desactiva la localización precisa del código
+      halfSample: true // Activa el modo de muestreo medio para acelerar el proceso
     }
   },
   function (err) {
@@ -181,8 +181,8 @@ function startScanner(deviceId) {
         readers: ["ean_reader", "codabar_reader"],
         multiple: false,
         multipleFrequency: 1, // Reduce la frecuencia de lectura para obtener resultados más rápidos
-        locate: true,
-        patchSize: "medium"
+        locate: false, // Desactiva la localización precisa del código
+        halfSample: true // Activa el modo de muestreo medio para acelerar el proceso
       }
     },
     function (err) {
@@ -237,7 +237,7 @@ Quagga.onDetected(function (result) {
       console.log("Comprobando más veces...");
       setTimeout(function () {
         Quagga.start();
-      }, 300);
+      }, 100); // Reducir el tiempo de espera entre comprobaciones
     }
 
     scannedCodes.push(code);
