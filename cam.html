@@ -115,142 +115,150 @@
  <script src="https://unpkg.com/quagga"></script>
   <script async src="https://docs.opencv.org/master/opencv.js" onload="onOpenCvLoaded();" type="text/javascript"></script>
   <script>
-    var scannedCodes = [];
-    var consecutiveCount = 0;
-    var currentCode = null;
+  var scannedCodes = [];
+var consecutiveCount = 0;
+var currentCode = null;
 
-    function loadOpenCvAndStartQuagga() {
-      Quagga.init(
-        {
-          inputStream: {
-            name: "Live",
-            type: "LiveStream",
-            target: document.querySelector("#video-camara"),
-            constraints: {
-              facingMode: "environment"
-            }
-          },
-          decoder: {
-            readers: ["ean_reader", "codabar_reader"],
-            multiple: false,
-            multipleFrequency: 5,
-            locate: true,
-            patchSize: "medium"
-          }
-        },
-        function (err) {
-          if (err) {
-            console.error("Error al inicializar Quagga: ", err);
-            return;
-          }
-          console.log("Quagga inicializado correctamente.");
-
-          Quagga.CameraAccess.enumerateVideoDevices().then(function (devices) {
-            var select = document.getElementById("camera-select");
-            devices.forEach(function (device) {
-              var option = document.createElement("option");
-              option.value = device.deviceId;
-              option.text = device.label || "Cámara " + (select.options.length + 1);
-              select.appendChild(option);
-            });
-
-            select.addEventListener("change", function (event) {
-              var deviceId = event.target.value;
-              startScanner(deviceId);
-            });
-
-            // Selección de cámara por defecto
-            var defaultDeviceId = devices[1].deviceId;
-            select.value = defaultDeviceId;
-            startScanner(defaultDeviceId);
-          });
-        }
-      );
-    }
-
-    function startScanner(deviceId) {
-      Quagga.stop();
-      Quagga.init(
-        {
-          inputStream: {
-            name: "Live",
-            type: "LiveStream",
-            target: document.querySelector("#video-camara"),
-            constraints: {
-              deviceId: deviceId
-            }
-          },
-          decoder: {
-            readers: ["ean_reader", "codabar_reader"],
-            multiple: false,
-            multipleFrequency: 5,
-            locate: true,
-            patchSize: "medium"
-          }
-        },
-        function (err) {
-          if (err) {
-            console.error("Error al inicializar Quagga: ", err);
-            return;
-          }
-          console.log("Quagga inicializado correctamente.");
-          Quagga.start();
-        }
-      );
-    }
-
-    function onOpenCvLoaded() {
-      console.log("OpenCV.js cargado correctamente.");
-      loadOpenCvAndStartQuagga();
-    }
-
-    Quagga.onDetected(function (result) {
-      if (result && result.codeResult && result.codeResult.code) {
-        var code = result.codeResult.code;
-        console.log("Código escaneado: ", code);
-
-        if (currentCode !== code) {
-          currentCode = code;
-          consecutiveCount = 1;
-        } else {
-          consecutiveCount++;
-        }
-
-        if (consecutiveCount >= 10) {
-          console.log("Código válido: ", code);
-          var resultadoElement = document.querySelector("#resultado");
-          resultadoElement.textContent = code;
-          Quagga.stop();
-
-          var maxCount = 0;
-          var mostFrequentCode = null;
-
-          scannedCodes.forEach(function (c) {
-            var count = scannedCodes.filter(function (code) {
-              return code === c;
-            }).length;
-            if (count > maxCount) {
-              maxCount = count;
-              mostFrequentCode = c;
-            }
-          });
-
-          if (mostFrequentCode) {
-            var inputCodigoMasCoincidencias = document.querySelector(
-              "#codigo-mas-coincidencias"
-            );
-            inputCodigoMasCoincidencias.value = mostFrequentCode;
-          }
-        } else {
-          console.log("Comprobando más veces...");
-          setTimeout(function () {
-            Quagga.start();
-          }, 300);
-        }
-
-        scannedCodes.push(code);
+Quagga.init(
+  {
+    inputStream: {
+      name: "Live",
+      type: "LiveStream",
+      target: document.querySelector("#video-camara"),
+      constraints: {
+        facingMode: "environment"
       }
+    },
+    decoder: {
+      readers: ["ean_reader", "codabar_reader"],
+      multiple: false,
+      locate: true,
+      patchSize: "medium"
+    }
+  },
+  function (err) {
+    if (err) {
+      console.error("Error al inicializar Quagga: ", err);
+      return;
+    }
+    console.log("Quagga inicializado correctamente.");
+
+    Quagga.CameraAccess.enumerateVideoDevices().then(function (devices) {
+      var select = document.getElementById("camera-select");
+      devices.forEach(function (device) {
+        var option = document.createElement("option");
+        option.value = device.deviceId;
+        option.text = device.label || "Cámara " + (select.options.length + 1);
+        select.appendChild(option);
+      });
+
+      select.addEventListener("change", function (event) {
+        var deviceId = event.target.value;
+        startScanner(deviceId);
+      });
+
+      // Selección de cámara por defecto
+      var defaultDeviceId = devices[1].deviceId;
+      select.value = defaultDeviceId;
+      startScanner(defaultDeviceId);
     });
+  }
+);
+
+function startScanner(deviceId) {
+  Quagga.stop();
+  Quagga.init(
+    {
+      inputStream: {
+        name: "Live",
+        type: "LiveStream",
+        target: document.querySelector("#video-camara"),
+        constraints: {
+          deviceId: deviceId
+        }
+      },
+      decoder: {
+        readers: ["ean_reader", "codabar_reader"],
+        multiple: false,
+        locate: true,
+        patchSize: "medium"
+      }
+    },
+    function (err) {
+      if (err) {
+        console.error("Error al inicializar Quagga: ", err);
+        return;
+      }
+      console.log("Quagga inicializado correctamente.");
+      Quagga.start();
+    }
+  );
+}
+
+Quagga.onProcessed(function (result) {
+  var drawingCtx = Quagga.canvas.ctx.overlay;
+  var drawingCanvas = Quagga.canvas.dom.overlay;
+  drawingCtx.clearRect(0, 0, parseInt(drawingCanvas.getAttribute("width")), parseInt(drawingCanvas.getAttribute("height")));
+
+  if (result && result.boxes) {
+    result.boxes.filter(function (box) {
+      return box !== result.box;
+    }).forEach(function (box) {
+      Quagga.ImageDebug.drawPath(box, { x: 0, y: 1 }, drawingCtx, { color: "green", lineWidth: 2 });
+    });
+  }
+
+  if (result && result.box) {
+    Quagga.ImageDebug.drawPath(result.box, { x: 0, y: 1 }, drawingCtx, { color: "#00F", lineWidth: 2 });
+  }
+
+  if (result && result.codeResult && result.codeResult.code) {
+    var code = result.codeResult.code;
+    console.log("Código escaneado: ", code);
+
+    if (currentCode !== code) {
+      currentCode = code;
+      consecutiveCount = 1;
+    } else {
+      consecutiveCount++;
+    }
+
+    if (consecutiveCount >= 10) {
+      console.log("Código válido: ", code);
+      var resultadoElement = document.querySelector("#resultado");
+      resultadoElement.textContent = code;
+      Quagga.stop();
+
+      var maxCount = 0;
+      var mostFrequentCode = null;
+
+      scannedCodes.forEach(function (c) {
+        var count = scannedCodes.filter(function (code) {
+          return code === c;
+        }).length;
+        if (count > maxCount) {
+          maxCount = count;
+          mostFrequentCode = c;
+        }
+      });
+
+      if (mostFrequentCode) {
+        var inputCodigoMasCoincidencias = document.querySelector(
+          "#codigo-mas-coincidencias"
+        );
+        inputCodigoMasCoincidencias.value = mostFrequentCode;
+      }
+    } else {
+      console.log("Comprobando más veces...");
+      setTimeout(function () {
+        Quagga.start();
+      }, 300);
+    }
+
+    scannedCodes.push(code);
+  }
+});
+
   </script>
 </body>
 
