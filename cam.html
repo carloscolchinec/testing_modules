@@ -4,78 +4,33 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title>Lector de códigos de barras y códigos QR con QuaggaJS</title>
+  <title>Lector de códigos de barras</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <style>
-    #center-screen-media {
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      display: flex;
-    }
-    
-    .card {
-      box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
-    }
-    
-    .card-header {
-      background-color: #007bff;
-      color: #fff;
-      padding: 10px;
-      font-size: 24px;
-      text-align: center;
-    }
-    
-    .card-body {
-      padding: 10px;
-    }
-    
     #video-camara {
-      width: 100%;
-      height: auto;
-      border: 1px solid #ced4da;
-      background-color: #fff;
-    }
-    
-    .form-group {
-      margin-bottom: 20px;
-    }
-    
-    .form-group label {
-      font-size: 18px;
-    }
-    
-    #codigo-mas-coincidencias {
-      font-size: 18px;
-      padding: 10px;
-    }
-    
-    #resultado {
-      text-align: center;
-      font-size: 18px;
-      margin-top: 20px;
+      max-width: 100%;
     }
   </style>
 </head>
 
 <body>
-
-  <div id="center-screen-media">
-    <div class="container">
-      <div class="card">
-        <div class="card-header">
-          COLNET-CAM | Escanear
-        </div>
-        <div class="card-body">
-          <div class="embed-responsive embed-responsive-16by9">
-            <select id="camera-select" class="form-control mb-3"></select>
-            <video id="video-camara" class="embed-responsive-item"></video>
+  <div class="container mt-5">
+    <div class="row">
+      <div class="col-md-6 offset-md-3">
+        <div class="card">
+          <div class="card-header">
+           ColnetCAM | Detector
           </div>
-          <div class="form-group mt-3">
-            <label for="codigo-mas-coincidencias">Código con más coincidencias</label>
-            <input type="text" id="codigo-mas-coincidencias" class="form-control" placeholder="Código con más coincidencias">
+          <div class="card-body">
+            <div class="embed-responsive embed-responsive-16by9">
+              <div id="video-camara" class="embed-responsive-item"></div>
+            </div>
+            <div class="form-group mt-3">
+              <label for="codigo-mas-coincidencias">Código con más coincidencias</label>
+              <input type="text" id="codigo-mas-coincidencias" class="form-control" placeholder="Código con más coincidencias">
+            </div>
+            <div id="resultado"></div>
           </div>
-          <div id="resultado"></div>
         </div>
       </div>
     </div>
@@ -96,17 +51,16 @@
           facingMode: "environment"
         },
         area: {
-          top: "0%",
-          right: "0%",
-          left: "0%",
-          bottom: "0%"
-        },
-        singleChannel: false,
-        size: 640,
-        numOfWorkers: 4,
-        decoder: {
-          readers: ["ean_reader", "codabar_reader"]
-        },
+          top: "30%",
+          right: "30%",
+          left: "30%",
+          bottom: "30%"
+        }
+      },
+      decoder: {
+        readers: ["ean_reader", "codabar_reader"],
+        multiple: false,
+        multipleFrequency: 1
       },
     }, function(err) {
       if (err) {
@@ -115,56 +69,7 @@
       }
       console.log("Quagga inicializado correctamente.");
       Quagga.start();
-
-      Quagga.CameraAccess.enumerateVideoDevices()
-        .then(function(devices) {
-          var select = document.getElementById("camera-select");
-          devices.forEach(function(device) {
-            var option = document.createElement("option");
-            option.value = device.deviceId;
-            option.text = device.label || "Cámara " + (select.options.length + 1);
-            select.appendChild(option);
-          });
-
-          select.addEventListener("change", function(event) {
-            var deviceId = event.target.value;
-            startScanner(deviceId);
-          });
-        });
     });
-
-    function startScanner(deviceId) {
-      Quagga.stop();
-      Quagga.init({
-        inputStream: {
-          name: "Live",
-          type: "LiveStream",
-          target: document.querySelector("#video-camara"),
-          constraints: {
-            deviceId: deviceId
-          },
-          area: {
-            top: "0%",
-            right: "0%",
-            left: "0%",
-            bottom: "0%"
-          },
-          singleChannel: false,
-          size: 640,
-          numOfWorkers: 4,
-          decoder: {
-            readers: ["ean_reader", "codabar_reader"]
-          },
-        },
-      }, function(err) {
-        if (err) {
-          console.error("Error al inicializar Quagga: ", err);
-          return;
-        }
-        console.log("Quagga inicializado correctamente.");
-        Quagga.start();
-      });
-    }
 
     Quagga.onDetected(function(result) {
       if (result && result.codeResult && result.codeResult.code) {
@@ -203,7 +108,7 @@
           console.log("Comprobando más veces...");
           setTimeout(function() {
             Quagga.start();
-          }, 300);
+          }, 100);
         }
 
         scannedCodes.push(code);
