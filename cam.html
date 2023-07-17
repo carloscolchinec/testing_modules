@@ -38,9 +38,9 @@
 
   <script src="https://unpkg.com/quagga"></script>
   <script>
-    var scannedCodes = [];
-    var consecutiveCount = 0;
-    var currentCode = null;
+    const scannedCodes = new Set();
+    let consecutiveCount = 0;
+    let currentCode = null;
 
     Quagga.init({
       inputStream: {
@@ -64,45 +64,49 @@
     });
 
     Quagga.onDetected(function(result) {
-      if (result && result.codeResult && result.codeResult.code) {
-        var code = result.codeResult.code;
-        console.log("Código escaneado: ", code);
+      const code = result.codeResult.code;
+      console.log("Código escaneado: ", code);
 
-        if (currentCode !== code) {
-          currentCode = code;
-          consecutiveCount = 1;
-        } else {
-          consecutiveCount++;
-        }
-
-        if (consecutiveCount >= 10) {
-          console.log("Código válido: ", code);
-          var resultadoElement = document.querySelector("#resultado");
-          resultadoElement.textContent = "Código válido: " + code;
-          Quagga.stop();
-
-          var maxCount = 0;
-          var mostFrequentCode = null;
-
-          scannedCodes.forEach(function(c) {
-            var count = scannedCodes.filter(function(code) { return code === c; }).length;
-            if (count > maxCount) {
-              maxCount = count;
-              mostFrequentCode = c;
-            }
-          });
-
-          if (mostFrequentCode) {
-            var inputCodigoMasCoincidencias = document.querySelector("#codigo-mas-coincidencias");
-            inputCodigoMasCoincidencias.value = mostFrequentCode;
-          }
-        } else {
-          console.log("Comprobando más veces...");
-          setTimeout(function() {
-            Quagga.start();
-          }, 300);
-        }
+      if (currentCode !== code) {
+        currentCode = code;
+        consecutiveCount = 1;
+      } else {
+        consecutiveCount++;
       }
+
+      if (consecutiveCount >= 10) {
+        console.log("Código válido: ", code);
+        const resultadoElement = document.querySelector("#resultado");
+        resultadoElement.textContent = "Código válido: " + code;
+        Quagga.stop();
+
+        const counts = new Map();
+        scannedCodes.forEach(c => {
+          counts.set(c, (counts.get(c) || 0) + 1);
+        });
+
+        let maxCount = 0;
+        let mostFrequentCode = null;
+
+        counts.forEach((count, code) => {
+          if (count > maxCount) {
+            maxCount = count;
+            mostFrequentCode = code;
+          }
+        });
+
+        if (mostFrequentCode) {
+          const inputCodigoMasCoincidencias = document.querySelector("#codigo-mas-coincidencias");
+          inputCodigoMasCoincidencias.value = mostFrequentCode;
+        }
+      } else {
+        console.log("Comprobando más veces...");
+        setTimeout(function() {
+          Quagga.start();
+        }, 300);
+      }
+
+      scannedCodes.add(code);
     });
   </script>
 </body>
