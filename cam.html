@@ -7,7 +7,7 @@
   <title>Lector de códigos de barras</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <style>
-     body {
+    body {
       background-color: #f4f4f4;
     }
 
@@ -61,7 +61,7 @@
 </head>
 
 <body>
-   <div class="container mt-5">
+  <div class="container mt-5">
     <div class="row">
       <div class="col-md-6 offset-md-3">
         <div class="card">
@@ -76,14 +76,14 @@
           <div class="card-footer">
             <div class="select-label">Seleccionar cámara:</div>
             <select id="camera-select" class="form-control"></select>
-            <div id="resultado"></div>
+            <div id="resultado">Escanea un código</div>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  
+
   <script src="https://unpkg.com/quagga"></script>
   <script>
     var scannedCodes = [];
@@ -179,7 +179,7 @@
         if (consecutiveCount >= 10) {
           console.log("Código válido: ", code);
           var resultadoElement = document.querySelector("#resultado");
-          resultadoElement.textContent = "Código válido: " + code;
+          resultadoElement.textContent = code;
           Quagga.stop();
 
           var maxCount = 0;
