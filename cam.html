@@ -130,11 +130,11 @@
           }
         },
         decoder: {
-          readers: ["ean_reader", "codabar_reader"],
+          readers: ["ean_reader"],
           multiple: false,
-          multipleFrequency: 5,
+          multipleFrequency: 1,
           locate: true,
-          patchSize: "medium"
+          patchSize: "small"
         }
       },
       function (err) {
@@ -178,13 +178,13 @@
               deviceId: deviceId
             }
           },
-          decoder: {
-            readers: ["ean_reader", "codabar_reader"],
-            multiple: false,
-            multipleFrequency: 5,
-            locate: true,
-            patchSize: "medium"
-          }
+         decoder: {
+          readers: ["ean_reader"],
+          multiple: false,
+          multipleFrequency: 1,
+          locate: true,
+          patchSize: "small"
+        }
         },
         function (err) {
           if (err) {
