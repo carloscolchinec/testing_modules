@@ -39,7 +39,7 @@
 
   <script src="https://unpkg.com/quagga"></script>
   <script>
-    var scannedCodes = [];
+     var scannedCodes = [];
     var consecutiveCount = 0;
     var currentCode = null;
 
@@ -51,9 +51,19 @@
         constraints: {
           facingMode: "environment"
         },
+        area: {
+          top: "30%",
+          right: "30%",
+          left: "30%",
+          bottom: "30%"
+        }
       },
       decoder: {
-        readers: ["ean_reader", "codabar_reader"]
+        readers: ["ean_reader", "codabar_reader"],
+        multiple: false,
+        multipleFrequency: 2,
+        locate: true,
+        patchSize: "medium"
       },
     }, function(err) {
       if (err) {
@@ -101,8 +111,10 @@
           console.log("Comprobando más veces...");
           setTimeout(function() {
             Quagga.start();
-          }, 300);
+          }, 100);
         }
+
+        scannedCodes.push(code);
       }
     });
   </script>
