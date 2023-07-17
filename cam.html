@@ -7,30 +7,51 @@
   <title>COLNET-CAM</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    
     #video-camara {
-      max-width: 100%;
+      width: 100%;
+      max-width: 600px;
+      height: auto;
+      border: 1px solid #ced4da;
+      background-color: #fff;
+    }
+    
+    .result-container {
+      margin-top: 20px;
+      text-align: center;
+    }
+    
+    .result-container input {
+      font-size: 18px;
+      text-align: center;
+      padding: 10px;
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
     }
   </style>
 </head>
 
 <body>
-  <div class="container mt-5">
-    <div class="row">
-      <div class="col-md-6 offset-md-3">
-        <div class="card">
-          <div class="card-header">
-            COLNET-CAM: Lector de códigos de barras y códigos QR
-          </div>
-          <div class="card-body">
-            <div class="embed-responsive embed-responsive-16by9">
-              <div id="video-camara" class="embed-responsive-item"></div>
-            </div>
-            <div class="form-group mt-3">
-              <label for="codigo-mas-coincidencias">Código con más coincidencias</label>
-              <input type="text" id="codigo-mas-coincidencias" class="form-control" placeholder="Código con más coincidencias">
-            </div>
-            <div id="resultado"></div>
-          </div>
+  <div class="container">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title text-center">COLNET-CAM: Lector de códigos de barras y códigos QR</h4>
+        <div class="embed-responsive embed-responsive-16by9">
+          <video id="video-camara" autoplay></video>
+        </div>
+        <div class="result-container">
+          <input type="text" id="codigo-mas-coincidencias" class="form-control" placeholder="Código con más coincidencias" readonly>
         </div>
       </div>
     </div>
@@ -77,8 +98,8 @@
 
         if (consecutiveCount >= 10) {
           console.log("Código válido: ", code);
-          var resultadoElement = document.querySelector("#resultado");
-          resultadoElement.textContent = "Código válido: " + code;
+          var resultadoElement = document.querySelector("#codigo-mas-coincidencias");
+          resultadoElement.value = code;
           Quagga.stop();
 
           var maxCount = 0;
@@ -93,8 +114,7 @@
           });
 
           if (mostFrequentCode) {
-            var inputCodigoMasCoincidencias = document.querySelector("#codigo-mas-coincidencias");
-            inputCodigoMasCoincidencias.value = mostFrequentCode;
+            resultadoElement.value = mostFrequentCode;
           }
         } else {
           console.log("Comprobando más veces...");
@@ -102,10 +122,11 @@
             Quagga.start();
           }, 300);
         }
+
+        scannedCodes.push(code);
       }
     });
   </script>
 </body>
 
 </html>
-
