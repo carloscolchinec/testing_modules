@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width">
   <title>Lector de códigos de barras</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
- <style>
+  <style>
     body {
       background-color: #f4f4f4;
     }
@@ -57,24 +57,24 @@
       font-weight: bold;
     }
 
-.video-container {
-  position: relative;
-}
+    .video-container {
+      position: relative;
+    }
 
-#canvas,
-.barcode-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
+    #canvas,
+    .barcode-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
 
-.barcode-overlay {
-  border: 2px solid red;
-  opacity: 0.5;
-  pointer-events: none;
-}
+    .barcode-overlay {
+      border: 2px solid red;
+      opacity: 0.5;
+      pointer-events: none;
+    }
 
     #video-camara > video {
       width: 100% !important;
@@ -93,15 +93,15 @@
           <div class="card-header text-center">
             COLNETCAM | LECTOR DE BARRA
           </div>
-       <div class="card-body">
-  <div class="embed-responsive embed-responsive-16by9">
-    <div class="video-container">
-      <video id="video" class="embed-responsive-item"></video>
-      <canvas id="canvas"></canvas>
-      <div class="barcode-overlay"></div>
-    </div>
-  </div>
-</div>
+          <div class="card-body">
+            <div class="embed-responsive embed-responsive-16by9">
+              <div class="video-container">
+                <video id="video" class="embed-responsive-item"></video>
+                <canvas id="canvas"></canvas>
+                <div class="barcode-overlay"></div>
+              </div>
+            </div>
+          </div>
 
           <div class="card-footer">
             <div class="select-label">Seleccionar cámara:</div>
@@ -113,51 +113,48 @@
     </div>
   </div>
 
-
-
   <script src="https://unpkg.com/quagga"></script>
   <script>
-
-    
     var scannedCodes = [];
     var consecutiveCount = 0;
     var currentCode = null;
 
-    Quagga.init({
-      inputStream: {
-        name: "Live",
-        type: "LiveStream",
-        target: document.querySelector("#video-camara"),
-        constraints: {
-          facingMode: "environment"
+    Quagga.init(
+      {
+        inputStream: {
+          name: "Live",
+          type: "LiveStream",
+          target: document.querySelector("#video"),
+          constraints: {
+            facingMode: "environment"
+          }
         },
+        decoder: {
+          readers: ["ean_reader", "codabar_reader"],
+          multiple: false,
+          multipleFrequency: 5,
+          locate: true,
+          patchSize: "medium"
+        }
       },
-      decoder: {
-        readers: ["ean_reader", "codabar_reader"],
-        multiple: false,
-        multipleFrequency: 5,
-        locate: true,
-        patchSize: "medium"
-      },
-    }, function(err) {
-      if (err) {
-        console.error("Error al inicializar Quagga: ", err);
-        return;
-      }
-      console.log("Quagga inicializado correctamente.");
-      Quagga.start();
+      function (err) {
+        if (err) {
+          console.error("Error al inicializar Quagga: ", err);
+          return;
+        }
+        console.log("Quagga inicializado correctamente.");
+        Quagga.start();
 
-      Quagga.CameraAccess.enumerateVideoDevices()
-        .then(function(devices) {
+        Quagga.CameraAccess.enumerateVideoDevices().then(function (devices) {
           var select = document.getElementById("camera-select");
-          devices.forEach(function(device) {
+          devices.forEach(function (device) {
             var option = document.createElement("option");
             option.value = device.deviceId;
             option.text = device.label || "Cámara " + (select.options.length + 1);
             select.appendChild(option);
           });
 
-          select.addEventListener("change", function(event) {
+          select.addEventListener("change", function (event) {
             var deviceId = event.target.value;
             startScanner(deviceId);
           });
@@ -167,37 +164,41 @@
           select.value = defaultDeviceId;
           startScanner(defaultDeviceId);
         });
-    });
+      }
+    );
 
     function startScanner(deviceId) {
       Quagga.stop();
-      Quagga.init({
-        inputStream: {
-          name: "Live",
-          type: "LiveStream",
-          target: document.querySelector("#video-camara"),
-          constraints: {
-            deviceId: deviceId
+      Quagga.init(
+        {
+          inputStream: {
+            name: "Live",
+            type: "LiveStream",
+            target: document.querySelector("#video"),
+            constraints: {
+              deviceId: deviceId
+            }
           },
+          decoder: {
+            readers: ["ean_reader", "codabar_reader"],
+            multiple: false,
+            multipleFrequency: 5,
+            locate: true,
+            patchSize: "medium"
+          }
         },
-        decoder: {
-          readers: ["ean_reader", "codabar_reader"],
-          multiple: false,
-          multipleFrequency: 5,
-          locate: true,
-          patchSize: "medium"
-        },
-      }, function(err) {
-        if (err) {
-          console.error("Error al inicializar Quagga: ", err);
-          return;
+        function (err) {
+          if (err) {
+            console.error("Error al inicializar Quagga: ", err);
+            return;
+          }
+          console.log("Quagga inicializado correctamente.");
+          Quagga.start();
         }
-        console.log("Quagga inicializado correctamente.");
-        Quagga.start();
-      });
+      );
     }
 
-    Quagga.onDetected(function(result) {
+    Quagga.onDetected(function (result) {
       if (result && result.codeResult && result.codeResult.code) {
         var code = result.codeResult.code;
         console.log("Código escaneado: ", code);
@@ -218,8 +219,10 @@
           var maxCount = 0;
           var mostFrequentCode = null;
 
-          scannedCodes.forEach(function(c) {
-            var count = scannedCodes.filter(function(code) { return code === c; }).length;
+          scannedCodes.forEach(function (c) {
+            var count = scannedCodes.filter(function (code) {
+              return code === c;
+            }).length;
             if (count > maxCount) {
               maxCount = count;
               mostFrequentCode = c;
@@ -227,41 +230,41 @@
           });
 
           if (mostFrequentCode) {
-            var inputCodigoMasCoincidencias = document.querySelector("#codigo-mas-coincidencias");
+            var inputCodigoMasCoincidencias = document.querySelector(
+              "#codigo-mas-coincidencias"
+            );
             inputCodigoMasCoincidencias.value = mostFrequentCode;
           }
         } else {
           console.log("Comprobando más veces...");
-          setTimeout(function() {
+          setTimeout(function () {
             Quagga.start();
           }, 300);
         }
 
         scannedCodes.push(code);
       }
-
-
-       function drawOverlay(rect) {
-  const canvas = document.getElementById("canvas");
-  const context = canvas.getContext("2d");
-
-  // Limpia el canvas
-  context.clearRect(0, 0, canvas.width, canvas.height);
-
-  // Dibuja el rectángulo
-  context.strokeStyle = "red";
-  context.lineWidth = 2;
-  context.strokeRect(rect.x, rect.y, rect.width, rect.height);
-
-  // Dibuja el overlay
-  const overlay = document.querySelector(".barcode-overlay");
-  overlay.style.left = rect.x + "px";
-  overlay.style.top = rect.y + "px";
-  overlay.style.width = rect.width + "px";
-  overlay.style.height = rect.height + "px";
-}
-
     });
+
+    function drawOverlay(rect) {
+      const canvas = document.getElementById("canvas");
+      const context = canvas.getContext("2d");
+
+      // Limpia el canvas
+      context.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Dibuja el rectángulo
+      context.strokeStyle = "red";
+      context.lineWidth = 2;
+      context.strokeRect(rect.x, rect.y, rect.width, rect.height);
+
+      // Dibuja el overlay
+      const overlay = document.querySelector(".barcode-overlay");
+      overlay.style.left = rect.x + "px";
+      overlay.style.top = rect.y + "px";
+      overlay.style.width = rect.width + "px";
+      overlay.style.height = rect.height + "px";
+    }
   </script>
 </body>
 
