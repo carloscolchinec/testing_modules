@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width">
   <title>Lector de códigos de barras</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
+  <style>
     body {
       background-color: #f4f4f4;
     }
@@ -57,37 +57,9 @@
       font-weight: bold;
     }
 
-    #video-camara {
-      position: relative;
-    }
-
-    #video-camara::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      z-index: 1;
-    }
-
-    #video-camara .barcode-overlay {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 80%;
-      height: 60px;
-      border: 2px solid red;
-      opacity: 0.5;
-      z-index: 2;
-    }
-
     #video-camara > video {
-      width: 100% !important;
-      height: auto !important;
-      position: relative;
-      z-index: 0;
+        width: 100% !important;
+        height: auto !important;
     }
   </style>
 </head>
@@ -102,10 +74,7 @@
           </div>
           <div class="card-body">
             <div class="embed-responsive embed-responsive-16by9">
-              <div id="video-camara" class="embed-responsive-item">
-                <video></video>
-                <div class="barcode-overlay"></div>
-              </div>
+              <div id="video-camara" class="embed-responsive-item"></div>
             </div>
           </div>
           <div class="card-footer">
@@ -129,7 +98,7 @@
       inputStream: {
         name: "Live",
         type: "LiveStream",
-        target: document.querySelector("#video-camara video"),
+        target: document.querySelector("#video-camara"),
         constraints: {
           facingMode: "environment"
         },
@@ -177,7 +146,7 @@
         inputStream: {
           name: "Live",
           type: "LiveStream",
-          target: document.querySelector("#video-camara video"),
+          target: document.querySelector("#video-camara"),
           constraints: {
             deviceId: deviceId
           },
