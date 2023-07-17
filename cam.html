@@ -95,10 +95,8 @@
           </div>
           <div class="card-body">
             <div class="embed-responsive embed-responsive-16by9">
-              <div id="video-camara" class="embed-responsive-item">
-                <video></video>
-                <div id="video-overlay"></div>
-              </div>
+              <video id="video-camara" class="embed-responsive-item"></video>
+              <div id="video-overlay"></div>
             </div>
           </div>
           <div class="card-footer">
@@ -122,7 +120,7 @@
         inputStream: {
           name: "Live",
           type: "LiveStream",
-          target: document.querySelector("#video-camara video"),
+          target: document.querySelector("#video-camara"),
           constraints: {
             facingMode: "environment"
           }
@@ -171,7 +169,7 @@
           inputStream: {
             name: "Live",
             type: "LiveStream",
-            target: document.querySelector("#video-camara video"),
+            target: document.querySelector("#video-camara"),
             constraints: {
               deviceId: deviceId
             }
