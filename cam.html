@@ -113,61 +113,53 @@
   </div>
 
  <script src="https://unpkg.com/quagga"></script>
-  <script async src="https://docs.opencv.org/master/opencv.js" onload="onOpenCvLoaded();" type="text/javascript"></script>
+  <script async src="https://docs.opencv.org/master/opencv.js" type="text/javascript"></script>
   <script>
-  var scannedCodes = [];
-    var consecutiveCount = 0;
-    var currentCode = null;
+ // Variables para OpenCV.js
+    let src = null;
+    let dst = null;
 
-    Quagga.init(
-      {
-        inputStream: {
-          name: "Live",
-          type: "LiveStream",
-          target: document.querySelector("#video-camara"),
-          constraints: {
-            facingMode: "environment"
-          }
-        },
-        decoder: {
-          readers: ["ean_reader"],
-          multiple: false,
-          multipleFrequency: 1,
-          locate: true,
-          patchSize: "small"
-        }
-      },
-      function (err) {
-        if (err) {
-          console.error("Error al inicializar Quagga: ", err);
-          return;
-        }
-        console.log("Quagga inicializado correctamente.");
+    // Función de carga de OpenCV.js
+    function onOpenCvLoaded() {
+      // Inicializar el procesamiento de imagen
+      src = new cv.Mat();
+      dst = new cv.Mat();
 
-        Quagga.CameraAccess.enumerateVideoDevices().then(function (devices) {
-          var select = document.getElementById("camera-select");
-          devices.forEach(function (device) {
-            var option = document.createElement("option");
-            option.value = device.deviceId;
-            option.text = device.label || "Cámara " + (select.options.length + 1);
-            select.appendChild(option);
-          });
+      // Iniciar el escaneo de código de barras
+      startScanner();
+    }
 
-          select.addEventListener("change", function (event) {
-            var deviceId = event.target.value;
-            startScanner(deviceId);
-          });
+    // Función para procesar la imagen con OpenCV.js
+    function processImage() {
+      let video = document.getElementById("video-camara");
+      let canvas = document.createElement("canvas");
+      let context = canvas.getContext("2d");
 
-          // Selección de cámara por defecto
-          var defaultDeviceId = devices[1].deviceId;
-          select.value = defaultDeviceId;
-          startScanner(defaultDeviceId);
-        });
-      }
-    );
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    function startScanner(deviceId) {
-      Quagga.stop();
+      // Convertir el contenido del canvas a una imagen de OpenCV.js
+      let imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+      cv.matFromImageData(imageData, src);
+
+      // Procesar la imagen aquí utilizando las funciones de OpenCV.js
+      // Por ejemplo, puedes aplicar un filtro de mejora de calidad
+      cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY); // Convertir a escala de grises
+
+      // Mostrar la imagen procesada en un elemento canvas de salida
+      cv.imshow("video-overlay", dst);
+
+      // Liberar la memoria
+      src.delete();
+      dst.delete();
+
+      // Programar el siguiente procesamiento de imagen
+      requestAnimationFrame(processImage);
+    }
+
+    // Función para iniciar el escaneo de código de barras
+    function startScanner() {
       Quagga.init(
         {
           inputStream: {
@@ -175,16 +167,15 @@
             type: "LiveStream",
             target: document.querySelector("#video-camara"),
             constraints: {
-              deviceId: deviceId
+              facingMode: "environment"
             }
           },
-         decoder: {
-          readers: ["ean_reader"],
-          multiple: false,
-          multipleFrequency: 1,
-          locate: true,
-          patchSize: "small"
-        }
+          decoder: {
+            readers: ["ean_reader"],
+            multiple: false,
+            locate: true,
+            patchSize: "small"
+          }
         },
         function (err) {
           if (err) {
@@ -193,10 +184,14 @@
           }
           console.log("Quagga inicializado correctamente.");
           Quagga.start();
+
+          // Iniciar el procesamiento de imagen
+          requestAnimationFrame(processImage);
         }
       );
     }
 
+    // Función para manejar el escaneo de código de barras
     Quagga.onDetected(function (result) {
       if (result && result.codeResult && result.codeResult.code) {
         var code = result.codeResult.code;
