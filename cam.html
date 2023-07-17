@@ -36,6 +36,7 @@
             <div class="card-footer">
               <div class="select-label">Seleccionar cámara:</div>
               <select id="camera-select" class="form-control"></select>
+              <div id="resultado"></div>
             </div>
           </div>
         </div>
@@ -89,7 +90,7 @@
           });
 
           // Selección de cámara por defecto
-          var defaultDeviceId = devices[0].deviceId;
+          var defaultDeviceId = devices[1].deviceId;
           select.value = defaultDeviceId;
           startScanner(defaultDeviceId);
         });
