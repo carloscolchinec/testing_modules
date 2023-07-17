@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title>Lector de códigos de barras</title>
+  <title>Lector de códigos de barras y códigos QR con QuaggaJS</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <style>
     #video-camara {
@@ -20,7 +20,7 @@
       <div class="col-md-6 offset-md-3">
         <div class="card">
           <div class="card-header">
-           ColnetCAM | Detector
+            Lector de códigos de barras y códigos QR con QuaggaJS
           </div>
           <div class="card-body">
             <div class="embed-responsive embed-responsive-16by9">
@@ -39,7 +39,7 @@
 
   <script src="https://unpkg.com/quagga"></script>
   <script>
-     var scannedCodes = [];
+    var scannedCodes = [];
     var consecutiveCount = 0;
     var currentCode = null;
 
@@ -51,12 +51,6 @@
         constraints: {
           facingMode: "environment"
         },
-        area: {
-          top: "30%",
-          right: "30%",
-          left: "30%",
-          bottom: "30%"
-        }
       },
       decoder: {
         readers: ["ean_reader", "codabar_reader"],
@@ -111,10 +105,8 @@
           console.log("Comprobando más veces...");
           setTimeout(function() {
             Quagga.start();
-          }, 100);
+          }, 300);
         }
-
-        scannedCodes.push(code);
       }
     });
   </script>
