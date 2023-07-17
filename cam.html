@@ -115,7 +115,7 @@
  <script src="https://unpkg.com/quagga"></script>
   <script async src="https://docs.opencv.org/master/opencv.js" onload="onOpenCvLoaded();" type="text/javascript"></script>
   <script>
-  var scannedCodes = [];
+ var scannedCodes = [];
 var consecutiveCount = 0;
 var currentCode = null;
 
@@ -211,7 +211,9 @@ Quagga.onProcessed(function (result) {
   if (result && result.box) {
     Quagga.ImageDebug.drawPath(result.box, { x: 0, y: 1 }, drawingCtx, { color: "#00F", lineWidth: 2 });
   }
+});
 
+Quagga.onDetected(function (result) {
   if (result && result.codeResult && result.codeResult.code) {
     var code = result.codeResult.code;
     console.log("Código escaneado: ", code);
