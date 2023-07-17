@@ -7,7 +7,7 @@
   <title>Lector de códigos de barras</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <style>
-  body {
+    body {
       background-color: #f4f4f4;
     }
 
@@ -57,16 +57,9 @@
       font-weight: bold;
     }
 
-    /* Estilos adicionales para dispositivos móviles */
-    @media (max-width: 576px) {
-      .card-body {
-        padding: 0;
-      }
-
-      #video-camara {
-        width: 100%;
-        height: auto;
-      }
+    #video-camara > video {
+        width: 100% !important;
+        height: auto !important;
     }
   </style>
 </head>
