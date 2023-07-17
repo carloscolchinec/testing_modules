@@ -121,19 +121,18 @@ var currentCode = null;
 Quagga.init(
   {
     inputStream: {
-      name: "Live",
-      type: "LiveStream",
-      target: document.querySelector("#video-camara"),
+      size: 800,
+      singleChannel: true,
       constraints: {
-        facingMode: "environment"
+        facingMode: "environment",
+        advanced: [{ torch: true }]
       }
     },
     decoder: {
-      readers: ["ean_reader", "codabar_reader"],
-      multiple: false,
-      multipleFrequency: 1, // Reduce la frecuencia de lectura para obtener resultados más rápidos
-      locate: false, // Desactiva la localización precisa del código
-      halfSample: true // Activa el modo de muestreo medio para acelerar el proceso
+      readers: ["ean_reader"],
+      multiple: true, // Realiza múltiples intentos de detección
+      locate: true,
+      patchSize: "medium"
     }
   },
   function (err) {
