@@ -7,8 +7,16 @@
   <title>Lector de códigos de barras y códigos QR con QuaggaJS</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <style>
-    #video-camara {
-      max-width: 100%;
+    .card {
+      margin-top: 30px;
+    }
+
+    .select-label {
+      margin-bottom: 5px;
+    }
+
+    #camera-select {
+      width: 100%;
     }
   </style>
 </head>
@@ -23,16 +31,12 @@
           </div>
           <div class="card-body">
             <div class="embed-responsive embed-responsive-16by9">
-                <div id="video-camara" class="embed-responsive-item"></div>
+              <div id="video-camara" class="embed-responsive-item"></div>
             </div>
-            <div class="form-group mt-3">
-                <select id="camera-select" class="form-control mb-3"></select>
-              <label for="codigo-mas-coincidencias">Código con más coincidencias</label>
-              <input type="text" id="codigo-mas-coincidencias" class="form-control" placeholder="Código con más coincidencias">
+            <div class="card-footer">
+              <div class="select-label">Seleccionar cámara:</div>
+              <select id="camera-select" class="form-control"></select>
             </div>
-          </div>
-          <div class="card-footer">
-            <div id="resultado"></div>
           </div>
         </div>
       </div>
@@ -83,6 +87,11 @@
             var deviceId = event.target.value;
             startScanner(deviceId);
           });
+
+          // Selección de cámara por defecto
+          var defaultDeviceId = devices[0].deviceId;
+          select.value = defaultDeviceId;
+          startScanner(defaultDeviceId);
         });
     });
 
