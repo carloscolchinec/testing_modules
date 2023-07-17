@@ -128,10 +128,43 @@
 
           select.addEventListener("change", function(event) {
             var deviceId = event.target.value;
-            Quagga.CameraAccess.getActiveTrack().applyConstraints({ deviceId: deviceId });
+            startScanner(deviceId);
           });
         });
     });
+
+    function startScanner(deviceId) {
+      Quagga.stop();
+      Quagga.init({
+        inputStream: {
+          name: "Live",
+          type: "LiveStream",
+          target: document.querySelector("#video-camara"),
+          constraints: {
+            deviceId: deviceId
+          },
+          area: {
+            top: "0%",
+            right: "0%",
+            left: "0%",
+            bottom: "0%"
+          },
+          singleChannel: false,
+          size: 640,
+          numOfWorkers: 4,
+          decoder: {
+            readers: ["ean_reader", "codabar_reader"]
+          },
+        },
+      }, function(err) {
+        if (err) {
+          console.error("Error al inicializar Quagga: ", err);
+          return;
+        }
+        console.log("Quagga inicializado correctamente.");
+        Quagga.start();
+      });
+    }
 
     Quagga.onDetected(function(result) {
       if (result && result.codeResult && result.codeResult.code) {
