@@ -54,10 +54,10 @@
       },
       decoder: {
         readers: ["ean_reader", "codabar_reader"],
-        multiple: false,
+        multiple: true,
         multipleFrequency: 5,
         locate: true,
-        patchSize: "medium"
+        patchSize: "large"
       },
     }, function(err) {
       if (err) {
