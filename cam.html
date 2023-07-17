@@ -59,8 +59,7 @@
     #video-camara {
       position: relative;
       width: 100%;
-      height: 0;
-      padding-bottom: 56.25%; /* 16:9 aspect ratio */
+      padding-top: 56.25%; /* 16:9 aspect ratio */
     }
 
     #video-camara video {
@@ -73,18 +72,14 @@
 
     #video-overlay {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 10%;
+      left: 10%;
+      width: 80%;
+      height: 80%;
       background-color: rgba(0, 0, 0, 0.5);
       pointer-events: none;
-    }
-
-    #video-overlay rect {
-      fill: transparent;
-      stroke: red;
-      stroke-width: 2;
+      box-sizing: border-box;
+      border: 2px solid red;
     }
   </style>
 </head>
@@ -99,10 +94,10 @@
           </div>
           <div class="card-body">
             <div class="embed-responsive embed-responsive-16by9">
-              <div id="video-camara" class="embed-responsive-item"></div>
-              <svg id="video-overlay">
-                <rect id="video-rect" x="10%" y="10%" width="80%" height="80%" />
-              </svg>
+              <div id="video-camara" class="embed-responsive-item">
+                <video id="video"></video>
+                <div id="video-overlay"></div>
+              </div>
             </div>
           </div>
           <div class="card-footer">
@@ -126,7 +121,7 @@
         inputStream: {
           name: "Live",
           type: "LiveStream",
-          target: document.querySelector("#video-camara"),
+          target: document.querySelector("#video-camara video"),
           constraints: {
             facingMode: "environment"
           }
@@ -175,7 +170,7 @@
           inputStream: {
             name: "Live",
             type: "LiveStream",
-            target: document.querySelector("#video-camara"),
+            target: document.querySelector("#video-camara video"),
             constraints: {
               deviceId: deviceId
             }
