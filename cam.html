@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width">
   <title>Lector de códigos de barras</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
- <style>
+  <style>
     body {
       background-color: #f4f4f4;
     }
@@ -68,7 +68,6 @@
       left: 0;
       right: 0;
       bottom: 0;
-      border: 50px solid rgba(0, 0, 0, 0.5);
       z-index: 1;
     }
 
@@ -78,7 +77,7 @@
       left: 50%;
       transform: translate(-50%, -50%);
       width: 80%;
-      height: 40%;
+      height: 20%;
       border: 2px solid red;
       z-index: 2;
     }
@@ -87,7 +86,7 @@
       width: 100% !important;
       height: auto !important;
       position: relative;
-      z-index: 2;
+      z-index: 0;
     }
   </style>
 </head>
@@ -102,7 +101,10 @@
           </div>
           <div class="card-body">
             <div class="embed-responsive embed-responsive-16by9">
-              <div id="video-camara" class="embed-responsive-item"></div>
+              <div id="video-camara" class="embed-responsive-item">
+                <video></video>
+                <div class="barcode-overlay"></div>
+              </div>
             </div>
           </div>
           <div class="card-footer">
@@ -126,7 +128,7 @@
       inputStream: {
         name: "Live",
         type: "LiveStream",
-        target: document.querySelector("#video-camara"),
+        target: document.querySelector("#video-camara video"),
         constraints: {
           facingMode: "environment"
         },
@@ -174,7 +176,7 @@
         inputStream: {
           name: "Live",
           type: "LiveStream",
-          target: document.querySelector("#video-camara"),
+          target: document.querySelector("#video-camara video"),
           constraints: {
             deviceId: deviceId
           },
