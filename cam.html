@@ -119,15 +119,7 @@
     let src = null;
     let dst = null;
 
-    // Función de carga de OpenCV.js
-    function onOpenCvLoaded() {
-      // Inicializar el procesamiento de imagen
-      src = new cv.Mat();
-      dst = new cv.Mat();
 
-      // Iniciar el escaneo de código de barras
-      startScanner();
-    }
 
     // Función para procesar la imagen con OpenCV.js
     function processImage() {
@@ -192,53 +184,102 @@
     }
 
     // Función para manejar el escaneo de código de barras
-    Quagga.onDetected(function (result) {
-      if (result && result.codeResult && result.codeResult.code) {
-        var code = result.codeResult.code;
-        console.log("Código escaneado: ", code);
+   Quagga.onProcessed(function (result) {
+  var canvas = Quagga.canvas.dom.overlay;
+  var ctx = canvas.getContext("2d");
 
-        if (currentCode !== code) {
-          currentCode = code;
-          consecutiveCount = 1;
-        } else {
-          consecutiveCount++;
-        }
+  if (result && result.boxes) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        if (consecutiveCount >= 10) {
-          console.log("Código válido: ", code);
-          var resultadoElement = document.querySelector("#resultado");
-          resultadoElement.textContent = code;
-          Quagga.stop();
-
-          var maxCount = 0;
-          var mostFrequentCode = null;
-
-          scannedCodes.forEach(function (c) {
-            var count = scannedCodes.filter(function (code) {
-              return code === c;
-            }).length;
-            if (count > maxCount) {
-              maxCount = count;
-              mostFrequentCode = c;
-            }
-          });
-
-          if (mostFrequentCode) {
-            var inputCodigoMasCoincidencias = document.querySelector(
-              "#codigo-mas-coincidencias"
-            );
-            inputCodigoMasCoincidencias.value = mostFrequentCode;
-          }
-        } else {
-          console.log("Comprobando más veces...");
-          setTimeout(function () {
-            Quagga.start();
-          }, 300);
-        }
-
-        scannedCodes.push(code);
-      }
+    result.boxes.filter(function (box) {
+      return box !== result.box;
+    }).forEach(function (box) {
+      Quagga.ImageDebug.drawPath(box, { x: 0, y: 1 }, ctx, { color: "green", lineWidth: 2 });
     });
+  }
+
+  if (result && result.codeResult && result.codeResult.code) {
+    var code = result.codeResult.code;
+    console.log("Código escaneado: ", code);
+
+    if (currentCode !== code) {
+      currentCode = code;
+      consecutiveCount = 1;
+    } else {
+      consecutiveCount++;
+    }
+
+    if (consecutiveCount >= 10) {
+      console.log("Código válido: ", code);
+      var resultadoElement = document.querySelector("#resultado");
+      resultadoElement.textContent = code;
+      Quagga.stop();
+
+      var maxCount = 0;
+      var mostFrequentCode = null;
+
+      scannedCodes.forEach(function (c) {
+        var count = scannedCodes.filter(function (code) {
+          return code === c;
+        }).length;
+        if (count > maxCount) {
+          maxCount = count;
+          mostFrequentCode = c;
+        }
+      });
+
+      if (mostFrequentCode) {
+        var inputCodigoMasCoincidencias = document.querySelector(
+          "#codigo-mas-coincidencias"
+        );
+        inputCodigoMasCoincidencias.value = mostFrequentCode;
+      }
+    } else {
+      console.log("Comprobando más veces...");
+      setTimeout(function () {
+        Quagga.start();
+      }, 300);
+    }
+
+    scannedCodes.push(code);
+  }
+});
+
+function onOpenCvLoaded() {
+  var video = document.querySelector("#video-camara video");
+  var videoWidth = video.videoWidth;
+  var videoHeight = video.videoHeight;
+
+  var srcMat = cv.imread(video);
+  var dstMat = new cv.Mat();
+  cv.cvtColor(srcMat, dstMat, cv.COLOR_RGBA2GRAY);
+  cv.imshow("video-overlay", dstMat);
+  srcMat.delete();
+  dstMat.delete();
+
+  requestAnimationFrame(processVideoFrame);
+}
+
+function processVideoFrame() {
+  if (videoElement.readyState === videoElement.HAVE_ENOUGH_DATA) {
+    var canvas = document.createElement("canvas");
+    canvas.width = videoElement.videoWidth;
+    canvas.height = videoElement.videoHeight;
+
+    var ctx = canvas.getContext("2d");
+    ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+    var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    var srcMat = cv.matFromArray(canvas.height, canvas.width, cv.CV_8UC4, imageData.data);
+    var dstMat = new cv.Mat();
+    cv.cvtColor(srcMat, dstMat, cv.COLOR_RGBA2GRAY);
+    cv.imshow("video-overlay", dstMat);
+    srcMat.delete();
+    dstMat.delete();
+  }
+
+  requestAnimationFrame(processVideoFrame);
+}
   </script>
 </body>
 
