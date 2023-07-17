@@ -112,58 +112,61 @@
     </div>
   </div>
 
-  <script src="https://unpkg.com/quagga"></script>
+ <script src="https://unpkg.com/quagga"></script>
+  <script async src="https://docs.opencv.org/master/opencv.js" onload="onOpenCvLoaded();" type="text/javascript"></script>
   <script>
-  var scannedCodes = [];
+    var scannedCodes = [];
     var consecutiveCount = 0;
     var currentCode = null;
 
-    Quagga.init(
-      {
-        inputStream: {
-          name: "Live",
-          type: "LiveStream",
-          target: document.querySelector("#video-camara"),
-          constraints: {
-            facingMode: "environment"
+    function loadOpenCvAndStartQuagga() {
+      Quagga.init(
+        {
+          inputStream: {
+            name: "Live",
+            type: "LiveStream",
+            target: document.querySelector("#video-camara"),
+            constraints: {
+              facingMode: "environment"
+            }
+          },
+          decoder: {
+            readers: ["ean_reader", "codabar_reader"],
+            multiple: false,
+            multipleFrequency: 5,
+            locate: true,
+            patchSize: "medium"
           }
         },
-        decoder: {
-          readers: ["ean_reader", "codabar_reader"],
-          multiple: false,
-          multipleFrequency: 5,
-          locate: true,
-          patchSize: "medium"
-        }
-      },
-      function (err) {
-        if (err) {
-          console.error("Error al inicializar Quagga: ", err);
-          return;
-        }
-        console.log("Quagga inicializado correctamente.");
+        function (err) {
+          if (err) {
+            console.error("Error al inicializar Quagga: ", err);
+            return;
+          }
+          console.log("Quagga inicializado correctamente.");
 
-        Quagga.CameraAccess.enumerateVideoDevices().then(function (devices) {
-          var select = document.getElementById("camera-select");
-          devices.forEach(function (device) {
-            var option = document.createElement("option");
-            option.value = device.deviceId;
-            option.text = device.label || "Cámara " + (select.options.length + 1);
-            select.appendChild(option);
+          Quagga.CameraAccess.enumerateVideoDevices().then(function (devices) {
+            var select = document.getElementById("camera-select");
+            devices.forEach(function (device) {
+              var option = document.createElement("option");
+              option.value = device.deviceId;
+              option.text = device.label || "Cámara " + (select.options.length + 1);
+              select.appendChild(option);
+            });
+
+            select.addEventListener("change", function (event) {
+              var deviceId = event.target.value;
+              startScanner(deviceId);
+            });
+
+            // Selección de cámara por defecto
+            var defaultDeviceId = devices[1].deviceId;
+            select.value = defaultDeviceId;
+            startScanner(defaultDeviceId);
           });
-
-          select.addEventListener("change", function (event) {
-            var deviceId = event.target.value;
-            startScanner(deviceId);
-          });
-
-          // Selección de cámara por defecto
-          var defaultDeviceId = devices[1].deviceId;
-          select.value = defaultDeviceId;
-          startScanner(defaultDeviceId);
-        });
-      }
-    );
+        }
+      );
+    }
 
     function startScanner(deviceId) {
       Quagga.stop();
@@ -194,6 +197,11 @@
           Quagga.start();
         }
       );
+    }
+
+    function onOpenCvLoaded() {
+      console.log("OpenCV.js cargado correctamente.");
+      loadOpenCvAndStartQuagga();
     }
 
     Quagga.onDetected(function (result) {
@@ -237,7 +245,7 @@
           console.log("Comprobando más veces...");
           setTimeout(function () {
             Quagga.start();
-          }, 100);
+          }, 300);
         }
 
         scannedCodes.push(code);
