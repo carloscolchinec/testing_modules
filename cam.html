@@ -1,114 +1,117 @@
 <!DOCTYPE html>
-<html>
+<html data-bs-theme="light" lang="en">
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
-  <title>Lector de códigos de barras y códigos QR con QuaggaJS</title>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <style>
-    #video-camara {
-      max-width: 100%;
-    }
-  </style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>COLNET-CAM: Lector de códigos de barras</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .header {
+            height: 95px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #e7e7e3;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            color: #212529;
+        }
+
+        .container {
+            padding-top: 13px;
+        }
+
+        .video-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+
+        #preview {
+            width: 100%;
+            max-width: 640px;
+            height: auto;
+            border: 1px solid #ced4da;
+        }
+
+        .input-container {
+            padding-top: 25px;
+        }
+
+        .input-container input {
+            font-size: 24px;
+            text-align: center;
+            padding: 10px;
+        }
+    </style>
 </head>
 
 <body>
-  <div class="container mt-5">
-    <div class="row">
-      <div class="col-md-6 offset-md-3">
-        <div class="card">
-          <div class="card-header">
-            Lector de códigos de barras y códigos QR con QuaggaJS
-          </div>
-          <div class="card-body">
-            <div class="embed-responsive embed-responsive-16by9">
-              <div id="video-camara" class="embed-responsive-item"></div>
-            </div>
-            <div class="form-group mt-3">
-              <label for="codigo-mas-coincidencias">Código con más coincidencias</label>
-              <input type="text" id="codigo-mas-coincidencias" class="form-control" placeholder="Código con más coincidencias">
-            </div>
-            <div id="resultado"></div>
-          </div>
+    <header class="header">
+        <div>
+            <h1>COLNET-CAM: Lector de códigos de barras</h1>
         </div>
-      </div>
+    </header>
+    <div class="container">
+        <div class="video-container">
+            <video id="preview" autoplay></video>
+        </div>
+        <div class="input-container">
+            <div class="text-center">
+                <input id="barcodeInput" class="form-control form-control-lg" type="text" placeholder="Escanear código de barras" autofocus>
+            </div>
+        </div>
     </div>
-  </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+    <script>
+        const barcodeInput = document.getElementById('barcodeInput');
+        const videoElement = document.getElementById('preview');
 
-  <script src="https://unpkg.com/quagga"></script>
-  <script>
-    const scannedCodes = new Set();
-    let consecutiveCount = 0;
-    let currentCode = null;
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function(stream) {
+                videoElement.srcObject = stream;
+                initQuagga();
+            })
+            .catch(function(error) {
+                console.log('Ocurrió un error al acceder a la webcam: ', error);
+            });
 
-    Quagga.init({
-      inputStream: {
-        name: "Live",
-        type: "LiveStream",
-        target: document.querySelector("#video-camara"),
-        constraints: {
-          facingMode: "environment"
-        },
-      },
-      decoder: {
-        readers: ["ean_reader", "codabar_reader"]
-      },
-    }, function(err) {
-      if (err) {
-        console.error("Error al inicializar Quagga: ", err);
-        return;
-      }
-      console.log("Quagga inicializado correctamente.");
-      Quagga.start();
-    });
+        function initQuagga() {
+            Quagga.init({
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    target: videoElement
+                },
+                decoder: {
+                    readers: ["ean_reader"]
+                }
+            }, function(err) {
+                if (err) {
+                    console.error('Error al inicializar Quagga: ', err);
+                    return;
+                }
+                Quagga.start();
+            });
 
-    Quagga.onDetected(function(result) {
-      const code = result.codeResult.code;
-      console.log("Código escaneado: ", code);
-
-      if (currentCode !== code) {
-        currentCode = code;
-        consecutiveCount = 1;
-      } else {
-        consecutiveCount++;
-      }
-
-      if (consecutiveCount >= 10) {
-        console.log("Código válido: ", code);
-        const resultadoElement = document.querySelector("#resultado");
-        resultadoElement.textContent = "Código válido: " + code;
-        Quagga.stop();
-
-        const counts = new Map();
-        scannedCodes.forEach(c => {
-          counts.set(c, (counts.get(c) || 0) + 1);
-        });
-
-        let maxCount = 0;
-        let mostFrequentCode = null;
-
-        counts.forEach((count, code) => {
-          if (count > maxCount) {
-            maxCount = count;
-            mostFrequentCode = code;
-          }
-        });
-
-        if (mostFrequentCode) {
-          const inputCodigoMasCoincidencias = document.querySelector("#codigo-mas-coincidencias");
-          inputCodigoMasCoincidencias.value = mostFrequentCode;
+            Quagga.onDetected(function(result) {
+                if (result && result.codeResult && result.codeResult.code) {
+                    barcodeInput.value = result.codeResult.code;
+                    Quagga.stop();
+                }
+            });
         }
-      } else {
-        console.log("Comprobando más veces...");
-        setTimeout(function() {
-          Quagga.start();
-        }, 300);
-      }
-
-      scannedCodes.add(code);
-    });
-  </script>
+    </script>
 </body>
 
 </html>
