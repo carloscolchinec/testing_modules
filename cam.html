@@ -73,14 +73,18 @@
 
     #video-overlay {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 80%;
-      height: 60%;
-      border: 2px solid red;
-      opacity: 0.5;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
       pointer-events: none;
+    }
+
+    #video-overlay rect {
+      fill: transparent;
+      stroke: red;
+      stroke-width: 2;
     }
   </style>
 </head>
@@ -95,8 +99,10 @@
           </div>
           <div class="card-body">
             <div class="embed-responsive embed-responsive-16by9">
-              <video id="video-camara" class="embed-responsive-item"></video>
-              <div id="video-overlay"></div>
+              <div id="video-camara" class="embed-responsive-item"></div>
+              <svg id="video-overlay">
+                <rect id="video-rect" x="10%" y="10%" width="80%" height="80%" />
+              </svg>
             </div>
           </div>
           <div class="card-footer">
