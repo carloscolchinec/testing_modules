@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 
@@ -24,12 +23,15 @@
           </div>
           <div class="card-body">
             <div class="embed-responsive embed-responsive-16by9">
-              <div id="video-camara" class="embed-responsive-item"></div>
+                <div id="video-camara" class="embed-responsive-item"></div>
             </div>
             <div class="form-group mt-3">
+                <select id="camera-select" class="form-control mb-3"></select>
               <label for="codigo-mas-coincidencias">Código con más coincidencias</label>
               <input type="text" id="codigo-mas-coincidencias" class="form-control" placeholder="Código con más coincidencias">
             </div>
+          </div>
+          <div class="card-footer">
             <div id="resultado"></div>
           </div>
         </div>
@@ -66,7 +68,51 @@
       }
       console.log("Quagga inicializado correctamente.");
       Quagga.start();
+
+      Quagga.CameraAccess.enumerateVideoDevices()
+        .then(function(devices) {
+          var select = document.getElementById("camera-select");
+          devices.forEach(function(device) {
+            var option = document.createElement("option");
+            option.value = device.deviceId;
+            option.text = device.label || "Cámara " + (select.options.length + 1);
+            select.appendChild(option);
+          });
+
+          select.addEventListener("change", function(event) {
+            var deviceId = event.target.value;
+            startScanner(deviceId);
+          });
+        });
     });
+
+    function startScanner(deviceId) {
+      Quagga.stop();
+      Quagga.init({
+        inputStream: {
+          name: "Live",
+          type: "LiveStream",
+          target: document.querySelector("#video-camara"),
+          constraints: {
+            deviceId: deviceId
+          },
+        },
+        decoder: {
+          readers: ["ean_reader", "codabar_reader"],
+          multiple: false,
+          multipleFrequency: 5,
+          locate: true,
+          patchSize: "medium"
+        },
+      }, function(err) {
+        if (err) {
+          console.error("Error al inicializar Quagga: ", err);
+          return;
+        }
+        console.log("Quagga inicializado correctamente.");
+        Quagga.start();
+      });
+    }
 
     Quagga.onDetected(function(result) {
       if (result && result.codeResult && result.codeResult.code) {
@@ -107,6 +153,8 @@
             Quagga.start();
           }, 300);
         }
+
+        scannedCodes.push(code);
       }
     });
   </script>
