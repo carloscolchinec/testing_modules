@@ -116,170 +116,80 @@
   <script async src="https://docs.opencv.org/5.x/opencv.js" onload="onOpenCvLoaded();" type="text/javascript"></script>
   <script>
  // Variables para OpenCV.js
-    let src = null;
-    let dst = null;
+let src = null;
+let dst = null;
 
+// Función para procesar la imagen con OpenCV.js
+function processImage() {
+  let video = document.getElementById("video-camara");
+  let canvas = document.createElement("canvas");
+  let context = canvas.getContext("2d");
 
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Función para procesar la imagen con OpenCV.js
-    function processImage() {
-      let video = document.getElementById("video-camara");
-      let canvas = document.createElement("canvas");
-      let context = canvas.getContext("2d");
+  // Convertir el contenido del canvas a una imagen de OpenCV.js
+  let imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+  cv.matFromImageData(imageData, src);
 
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+  // Procesar la imagen aquí utilizando las funciones de OpenCV.js
+  // Por ejemplo, puedes aplicar un filtro de mejora de calidad
+  cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY); // Convertir a escala de grises
 
-      // Convertir el contenido del canvas a una imagen de OpenCV.js
-      let imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-      cv.matFromImageData(imageData, src);
+  // Mostrar la imagen procesada en un elemento canvas de salida
+  cv.imshow("video-overlay", dst);
 
-      // Procesar la imagen aquí utilizando las funciones de OpenCV.js
-      // Por ejemplo, puedes aplicar un filtro de mejora de calidad
-      cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY); // Convertir a escala de grises
+  // Liberar la memoria
+  src.delete();
+  dst.delete();
 
-      // Mostrar la imagen procesada en un elemento canvas de salida
-      cv.imshow("video-overlay", dst);
+  // Programar el siguiente procesamiento de imagen
+  requestAnimationFrame(processImage);
+}
 
-      // Liberar la memoria
-      src.delete();
-      dst.delete();
+// Función para iniciar el escaneo de código de barras
+function startScanner() {
+  Quagga.init(
+    {
+      inputStream: {
+        name: "Live",
+        type: "LiveStream",
+        target: document.querySelector("#video-camara"),
+        constraints: {
+          facingMode: "environment"
+        }
+      },
+      decoder: {
+        readers: ["ean_reader"],
+        multiple: false,
+        locate: true,
+        patchSize: "small"
+      }
+    },
+    function (err) {
+      if (err) {
+        console.error("Error al inicializar Quagga: ", err);
+        return;
+      }
+      console.log("Quagga inicializado correctamente.");
+      Quagga.start();
 
-      // Programar el siguiente procesamiento de imagen
+      // Iniciar el procesamiento de imagen
       requestAnimationFrame(processImage);
     }
+  );
+}
 
-    // Función para iniciar el escaneo de código de barras
-    function startScanner() {
-      Quagga.init(
-        {
-          inputStream: {
-            name: "Live",
-            type: "LiveStream",
-            target: document.querySelector("#video-camara"),
-            constraints: {
-              facingMode: "environment"
-            }
-          },
-          decoder: {
-            readers: ["ean_reader"],
-            multiple: false,
-            locate: true,
-            patchSize: "small"
-          }
-        },
-        function (err) {
-          if (err) {
-            console.error("Error al inicializar Quagga: ", err);
-            return;
-          }
-          console.log("Quagga inicializado correctamente.");
-          Quagga.start();
-
-          // Iniciar el procesamiento de imagen
-          requestAnimationFrame(processImage);
-        }
-      );
-    }
-
-    // Función para manejar el escaneo de código de barras
-   Quagga.onProcessed(function (result) {
-  var canvas = Quagga.canvas.dom.overlay;
-  var ctx = canvas.getContext("2d");
-
-  if (result && result.boxes) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    result.boxes.filter(function (box) {
-      return box !== result.box;
-    }).forEach(function (box) {
-      Quagga.ImageDebug.drawPath(box, { x: 0, y: 1 }, ctx, { color: "green", lineWidth: 2 });
-    });
-  }
-
-  if (result && result.codeResult && result.codeResult.code) {
-    var code = result.codeResult.code;
-    console.log("Código escaneado: ", code);
-
-    if (currentCode !== code) {
-      currentCode = code;
-      consecutiveCount = 1;
-    } else {
-      consecutiveCount++;
-    }
-
-    if (consecutiveCount >= 10) {
-      console.log("Código válido: ", code);
-      var resultadoElement = document.querySelector("#resultado");
-      resultadoElement.textContent = code;
-      Quagga.stop();
-
-      var maxCount = 0;
-      var mostFrequentCode = null;
-
-      scannedCodes.forEach(function (c) {
-        var count = scannedCodes.filter(function (code) {
-          return code === c;
-        }).length;
-        if (count > maxCount) {
-          maxCount = count;
-          mostFrequentCode = c;
-        }
-      });
-
-      if (mostFrequentCode) {
-        var inputCodigoMasCoincidencias = document.querySelector(
-          "#codigo-mas-coincidencias"
-        );
-        inputCodigoMasCoincidencias.value = mostFrequentCode;
-      }
-    } else {
-      console.log("Comprobando más veces...");
-      setTimeout(function () {
-        Quagga.start();
-      }, 300);
-    }
-
-    scannedCodes.push(code);
-  }
+// Evento para cargar OpenCV.js
+document.addEventListener("DOMContentLoaded", function() {
+  // Cargar OpenCV.js
+  cv.onRuntimeInitialized = function() {
+    // Iniciar el escaneo de código de barras
+    startScanner();
+  };
 });
 
-function onOpenCvLoaded() {
-  var video = document.querySelector("#video-camara video");
-  var videoWidth = video.videoWidth;
-  var videoHeight = video.videoHeight;
-
-  var srcMat = cv.imread(video);
-  var dstMat = new cv.Mat();
-  cv.cvtColor(srcMat, dstMat, cv.COLOR_RGBA2GRAY);
-  cv.imshow("video-overlay", dstMat);
-  srcMat.delete();
-  dstMat.delete();
-
-  requestAnimationFrame(processVideoFrame);
-}
-
-function processVideoFrame() {
-  if (videoElement.readyState === videoElement.HAVE_ENOUGH_DATA) {
-    var canvas = document.createElement("canvas");
-    canvas.width = videoElement.videoWidth;
-    canvas.height = videoElement.videoHeight;
-
-    var ctx = canvas.getContext("2d");
-    ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-
-    var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    var srcMat = cv.matFromArray(canvas.height, canvas.width, cv.CV_8UC4, imageData.data);
-    var dstMat = new cv.Mat();
-    cv.cvtColor(srcMat, dstMat, cv.COLOR_RGBA2GRAY);
-    cv.imshow("video-overlay", dstMat);
-    srcMat.delete();
-    dstMat.delete();
-  }
-
-  requestAnimationFrame(processVideoFrame);
-}
   </script>
 </body>
 
