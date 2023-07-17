@@ -7,16 +7,55 @@
   <title>Lector de códigos de barras y códigos QR con QuaggaJS</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <style>
+     body {
+      background-color: #f4f4f4;
+    }
+
     .card {
       margin-top: 30px;
+      border: none;
+      box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+      background-color: #337ab7;
+      color: #fff;
+      padding: 15px;
+      font-size: 20px;
+      font-weight: bold;
+      text-align: center;
+      border-bottom: none;
+    }
+
+    .card-body {
+      padding: 20px;
+    }
+
+    .card-footer {
+      background-color: #fff;
+      padding: 20px;
+      border-top: none;
+      text-align: center;
     }
 
     .select-label {
-      margin-bottom: 5px;
+      margin-bottom: 10px;
+      font-weight: bold;
     }
 
     #camera-select {
       width: 100%;
+      padding: 5px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    #resultado {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #e9ecef;
+      color: #333;
+      font-weight: bold;
     }
   </style>
 </head>
