@@ -118,26 +118,6 @@
   <script src="https://unpkg.com/quagga"></script>
   <script>
 
-  function drawOverlay(rect) {
-  const canvas = document.getElementById("canvas");
-  const context = canvas.getContext("2d");
-
-  // Limpia el canvas
-  context.clearRect(0, 0, canvas.width, canvas.height);
-
-  // Dibuja el rectángulo
-  context.strokeStyle = "red";
-  context.lineWidth = 2;
-  context.strokeRect(rect.x, rect.y, rect.width, rect.height);
-
-  // Dibuja el overlay
-  const overlay = document.querySelector(".barcode-overlay");
-  overlay.style.left = rect.x + "px";
-  overlay.style.top = rect.y + "px";
-  overlay.style.width = rect.width + "px";
-  overlay.style.height = rect.height + "px";
-}
-
     
     var scannedCodes = [];
     var consecutiveCount = 0;
@@ -259,6 +239,28 @@
 
         scannedCodes.push(code);
       }
+
+
+       function drawOverlay(rect) {
+  const canvas = document.getElementById("canvas");
+  const context = canvas.getContext("2d");
+
+  // Limpia el canvas
+  context.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Dibuja el rectángulo
+  context.strokeStyle = "red";
+  context.lineWidth = 2;
+  context.strokeRect(rect.x, rect.y, rect.width, rect.height);
+
+  // Dibuja el overlay
+  const overlay = document.querySelector(".barcode-overlay");
+  overlay.style.left = rect.x + "px";
+  overlay.style.top = rect.y + "px";
+  overlay.style.width = rect.width + "px";
+  overlay.style.height = rect.height + "px";
+}
+
     });
   </script>
 </body>
