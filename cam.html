@@ -119,6 +119,14 @@
     var consecutiveCount = 0;
     var currentCode = null;
 
+    // Iniciar la reproducción del video cuando se hace clic en la página
+    document.addEventListener("click", function () {
+      var video = document.getElementById("video");
+      if (video.paused) {
+        video.play();
+      }
+    });
+
     Quagga.init(
       {
         inputStream: {
@@ -143,7 +151,6 @@
           return;
         }
         console.log("Quagga inicializado correctamente.");
-        Quagga.start();
 
         Quagga.CameraAccess.enumerateVideoDevices().then(function (devices) {
           var select = document.getElementById("camera-select");
@@ -244,27 +251,27 @@
 
         scannedCodes.push(code);
       }
+
+      function drawOverlay(rect) {
+        const canvas = document.getElementById("canvas");
+        const context = canvas.getContext("2d");
+
+        // Limpia el canvas
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Dibuja el rectángulo
+        context.strokeStyle = "red";
+        context.lineWidth = 2;
+        context.strokeRect(rect.x, rect.y, rect.width, rect.height);
+
+        // Dibuja el overlay
+        const overlay = document.querySelector(".barcode-overlay");
+        overlay.style.left = rect.x + "px";
+        overlay.style.top = rect.y + "px";
+        overlay.style.width = rect.width + "px";
+        overlay.style.height = rect.height + "px";
+      }
     });
-
-    function drawOverlay(rect) {
-      const canvas = document.getElementById("canvas");
-      const context = canvas.getContext("2d");
-
-      // Limpia el canvas
-      context.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Dibuja el rectángulo
-      context.strokeStyle = "red";
-      context.lineWidth = 2;
-      context.strokeRect(rect.x, rect.y, rect.width, rect.height);
-
-      // Dibuja el overlay
-      const overlay = document.querySelector(".barcode-overlay");
-      overlay.style.left = rect.x + "px";
-      overlay.style.top = rect.y + "px";
-      overlay.style.width = rect.width + "px";
-      overlay.style.height = rect.height + "px";
-    }
   </script>
 </body>
 
