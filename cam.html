@@ -183,7 +183,21 @@
             multipleFrequency:1,
             locate: true,
             patchSize: "small"
+          },
+           debug: {
+          showCanvas: true,
+          showPatches: true,
+          showFoundPatches: true,
+          showSkeleton: true,
+          showLabels: true,
+          showPatchLabels: true,
+          showRemainingPatchLabels: true,
+          boxFromPatches: {
+            showTransformed: true,
+            showTransformedBox: true,
+            showBB: true
           }
+        }
         },
         function (err) {
           if (err) {
