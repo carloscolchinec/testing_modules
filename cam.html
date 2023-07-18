@@ -140,7 +140,7 @@
             // Crear una solicitud HTTP para enviar la imagen al servidor
             const formData = new FormData();
             formData.append('image', blob, 'image.jpg');
-            fetch('https://192.168.137.1:5000/process-image', {
+            fetch('https://192.168.1.3:5000/process-image', {
               method: 'POST',
               body: formData
             })
