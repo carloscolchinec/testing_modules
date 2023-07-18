@@ -7,56 +7,56 @@
   <title>Lector de códigos de barras</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <style>
-    body {
-      background-color: #f4f4f4;
-    }
+   body {
+  background-color: #f4f4f4;
+}
 
-    .card {
-      border: none;
-      box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
-    }
+.card {
+  border: none;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+}
 
-    .card-header {
-      background-color: #fe8e14;
-      color: #fff;
-      padding: 15px;
-      font-size: 20px;
-      font-weight: bold;
-      text-align: center;
-      border-bottom: none;
-    }
+.card-header {
+  background-color: #fe8e14;
+  color: #fff;
+  padding: 15px;
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+  border-bottom: none;
+}
 
-    .card-body {
-      padding: 0px;
-    }
+.card-body {
+  padding: 0px;
+}
 
-    .card-footer {
-      background-color: #fff;
-      padding: 20px;
-      border-top: none;
-      text-align: center;
-    }
+.card-footer {
+  background-color: #fff;
+  padding: 20px;
+  border-top: none;
+  text-align: center;
+}
 
-    .select-label {
-      margin-bottom: 10px;
-      font-weight: bold;
-    }
+.select-label {
+  margin-bottom: 10px;
+  font-weight: bold;
+}
 
-    #camera-select {
-      max-width: 100%;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-    }
+#camera-select {
+  max-width: 100%;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
 
-    #resultado {
-      margin-top: 20px;
-      padding: 10px;
-      background-color: #e9ecef;
-      color: #333;
-      font-weight: bold;
-    }
+#resultado {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #e9ecef;
+  color: #333;
+  font-weight: bold;
+}
 
-   #video-camara {
+#video-camara {
   position: relative;
   width: 100%;
 }
@@ -75,11 +75,12 @@
   left: 10%;
   width: 80%;
   height: 80%;
-  background-color: rgba(196, 196, 196, 0.18); /* Cambia el color a claro */
+  background-color: rgba(255, 255, 255, 0.7); /* Cambia el color a transparente */
   pointer-events: none;
   box-sizing: border-box;
   border: 2px solid #fe8e14;
 }
+
 
     canvas {
         width: 540px !important;
@@ -112,9 +113,9 @@
     </div>
   </div>
 
- <script src="https://unpkg.com/quagga"></script>
+  <script src="https://unpkg.com/quagga"></script>
   <script>
-  var scannedCodes = [];
+    var scannedCodes = [];
     var consecutiveCount = 0;
     var currentCode = null;
 
@@ -128,13 +129,13 @@
             facingMode: "environment"
           }
         },
-       decoder: {
-            readers: ["ean_reader", "codabar_reader"],
-            multiple: false,
-            multipleFrequency:1,
-            locate: true,
-            patchSize: "small"
-          }
+        decoder: {
+          readers: ["ean_reader"],
+          multiple: false,
+          multipleFrequency: 1,
+          locate: true,
+          patchSize: "small"
+        }
       },
       function (err) {
         if (err) {
@@ -180,24 +181,10 @@
           decoder: {
             readers: ["ean_reader", "codabar_reader"],
             multiple: false,
-            multipleFrequency:1,
+            multipleFrequency: 5,
             locate: true,
-            patchSize: "small"
-          },
-           debug: {
-          showCanvas: true,
-          showPatches: true,
-          showFoundPatches: true,
-          showSkeleton: true,
-          showLabels: true,
-          showPatchLabels: true,
-          showRemainingPatchLabels: true,
-          boxFromPatches: {
-            showTransformed: true,
-            showTransformedBox: true,
-            showBB: true
+            patchSize: "medium"
           }
-        }
         },
         function (err) {
           if (err) {
