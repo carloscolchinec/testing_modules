@@ -12,12 +12,42 @@
       margin: 0 auto;
       margin-top: 50px;
       padding: 20px;
+      position: relative; /* Añadido */
     }
 
     #barcodeResult {
       font-weight: bold;
       font-size: 20px;
       margin-bottom: 20px;
+    }
+
+    #videoElement {
+      width: 100%;
+      height: auto;
+    }
+
+    /* Añadido */
+    .card-body {
+      overflow: hidden;
+    }
+
+    /* Añadido */
+    .video-container {
+      position: relative;
+      width: 100%;
+      height: 0;
+      padding-bottom: 100%; /* Relación de aspecto 1:1 */
+      overflow: hidden;
+    }
+
+    /* Añadido */
+    .video-container video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
   </style>
 </head>
@@ -29,13 +59,19 @@
         <div class="card">
           <h5 class="card-title">Lector de códigos de barras</h5>
           <div class="card-body">
-            <video id="videoElement" autoplay></video>
+            <div class="video-container">
+              <video id="videoElement" autoplay></video>
+            </div>
           </div>
           <div class="card-footer">
             <form>
               <div class="mb-3">
                 <label for="barcodeResult" class="form-label">Código de barras:</label>
                 <input type="text" class="form-control" id="barcodeResult" readonly>
+              </div>
+              <div class="mb-3">
+                <label for="cameraSelect" class="form-label">Seleccionar cámara:</label>
+                <select class="form-select" id="cameraSelect"></select>
               </div>
             </form>
           </div>
@@ -47,10 +83,29 @@
   <script>
     const videoElement = document.getElementById('videoElement');
     const barcodeResultElement = document.getElementById('barcodeResult');
+    const cameraSelectElement = document.getElementById('cameraSelect');
 
     // Solicitar permiso para acceder a la cámara
     navigator.mediaDevices.getUserMedia({ video: true })
       .then(function (stream) {
+        // Obtener la lista de cámaras disponibles
+        navigator.mediaDevices.enumerateDevices()
+          .then(function (devices) {
+            // Filtrar solo los dispositivos de video
+            const videoDevices = devices.filter(device => device.kind === 'videoinput');
+
+            // Rellenar el select con las opciones de las cámaras
+            videoDevices.forEach(function (device, index) {
+              const option = document.createElement('option');
+              option.value = device.deviceId;
+              option.text = `Cámara ${index + 1}`;
+              cameraSelectElement.appendChild(option);
+            });
+          })
+          .catch(function (error) {
+            console.error('Error al enumerar los dispositivos:', error);
+          });
+
         // Asignar el stream de la cámara al elemento de video
         videoElement.srcObject = stream;
 
