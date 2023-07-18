@@ -12,42 +12,12 @@
       margin: 0 auto;
       margin-top: 50px;
       padding: 20px;
-      position: relative; /* Añadido */
     }
 
     #barcodeResult {
       font-weight: bold;
       font-size: 20px;
       margin-bottom: 20px;
-    }
-
-    #videoElement {
-      width: 100%;
-      height: auto;
-    }
-
-    /* Añadido */
-    .card-body {
-      overflow: hidden;
-    }
-
-    /* Añadido */
-    .video-container {
-      position: relative;
-      width: 100%;
-      height: 0;
-      padding-bottom: 100%; /* Relación de aspecto 1:1 */
-      overflow: hidden;
-    }
-
-    /* Añadido */
-    .video-container video {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
     }
   </style>
 </head>
@@ -59,9 +29,7 @@
         <div class="card">
           <h5 class="card-title">Lector de códigos de barras</h5>
           <div class="card-body">
-            <div class="video-container">
-              <video id="videoElement" autoplay></video>
-            </div>
+            <video id="videoElement" autoplay></video>
           </div>
           <div class="card-footer">
             <form>
@@ -84,6 +52,7 @@
     const videoElement = document.getElementById('videoElement');
     const barcodeResultElement = document.getElementById('barcodeResult');
     const cameraSelectElement = document.getElementById('cameraSelect');
+    let selectedDeviceId = null;
 
     // Solicitar permiso para acceder a la cámara
     navigator.mediaDevices.getUserMedia({ video: true })
@@ -101,60 +70,100 @@
               option.text = `Cámara ${index + 1}`;
               cameraSelectElement.appendChild(option);
             });
+
+            // Seleccionar la primera cámara por defecto
+            if (videoDevices.length > 0) {
+              selectedDeviceId = videoDevices[0].deviceId;
+              cameraSelectElement.value = selectedDeviceId;
+              startVideoStream();
+            }
           })
           .catch(function (error) {
             console.error('Error al enumerar los dispositivos:', error);
           });
 
-        // Asignar el stream de la cámara al elemento de video
-        videoElement.srcObject = stream;
+        // Función para iniciar el flujo de video con la cámara seleccionada
+        function startVideoStream() {
+          // Detener el flujo de video actual
+          stopVideoStream();
 
-        // Esperar a que el evento 'loadedmetadata' se dispare para asegurarse de que el video tenga dimensiones válidas
-        videoElement.addEventListener('loadedmetadata', function () {
-          // Iniciar el video después de que se haya cargado correctamente
-          videoElement.play();
+          // Obtener las opciones seleccionadas del select
+          selectedDeviceId = cameraSelectElement.value;
 
-          // Función para capturar un fotograma del video y enviarlo al servidor
-          function captureFrameAndSend() {
-            // Establecer el tamaño del canvas como el tamaño del video
-            const canvas = document.createElement('canvas');
-            canvas.width = videoElement.videoWidth;
-            canvas.height = videoElement.videoHeight;
+          // Solicitar el acceso a la cámara seleccionada
+          navigator.mediaDevices.getUserMedia({ video: { deviceId: selectedDeviceId } })
+            .then(function (stream) {
+              // Asignar el stream de la cámara al elemento de video
+              videoElement.srcObject = stream;
 
-            // Dibujar el fotograma actual en el canvas
-            const context = canvas.getContext('2d');
-            context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+              // Esperar a que el evento 'loadedmetadata' se dispare para asegurarse de que el video tenga dimensiones válidas
+              videoElement.addEventListener('loadedmetadata', function () {
+                // Iniciar el video después de que se haya cargado correctamente
+                videoElement.play();
+              });
+            })
+            .catch(function (error) {
+              console.error('Error al acceder a la cámara:', error);
+            });
+        }
 
-            // Convertir la imagen del canvas a un objeto Blob
-            canvas.toBlob(function (blob) {
-              // Crear una solicitud HTTP para enviar la imagen al servidor
-              const formData = new FormData();
-              formData.append('image', blob, 'image.jpg');
-              fetch('https://192.168.137.1:5000/process-image', {
-                method: 'POST',
-                body: formData
-              })
-                .then(response => response.json())
-                .then(data => {
-                  // Procesar el resultado recibido del servidor
-                  if (data.code) {
-                    barcodeResultElement.value = data.code;
-                  } else {
-                    barcodeResultElement.value = 'No se encontró ningún código de barras.';
-                  }
-                })
-                .catch(error => {
-                  console.error('Error al enviar la imagen al servidor:', error);
-                });
-            }, 'image/jpeg');
-
-            // Realizar la captura de fotograma y envío al servidor cada segundo
-            setTimeout(captureFrameAndSend, 1000);
+        // Función para detener el flujo de video actual
+        function stopVideoStream() {
+          const mediaStream = videoElement.srcObject;
+          if (mediaStream) {
+            const tracks = mediaStream.getTracks();
+            tracks.forEach(function (track) {
+              track.stop();
+            });
           }
+          videoElement.srcObject = null;
+        }
 
-          // Iniciar la captura de fotogramas y envío al servidor
-          captureFrameAndSend();
+        // Evento change para seleccionar la cámara
+        cameraSelectElement.addEventListener('change', function () {
+          startVideoStream();
         });
+
+        // Función para capturar un fotograma del video y enviarlo al servidor
+        function captureFrameAndSend() {
+          // Establecer el tamaño del canvas como el tamaño del video
+          const canvas = document.createElement('canvas');
+          canvas.width = videoElement.videoWidth;
+          canvas.height = videoElement.videoHeight;
+
+          // Dibujar el fotograma actual en el canvas
+          const context = canvas.getContext('2d');
+          context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+          // Convertir la imagen del canvas a un objeto Blob
+          canvas.toBlob(function (blob) {
+            // Crear una solicitud HTTP para enviar la imagen al servidor
+            const formData = new FormData();
+            formData.append('image', blob, 'image.jpg');
+            fetch('https://192.168.137.1:5000/process-image', {
+              method: 'POST',
+              body: formData
+            })
+              .then(response => response.json())
+              .then(data => {
+                // Procesar el resultado recibido del servidor
+                if (data.code) {
+                  barcodeResultElement.value = data.code;
+                } else {
+                  barcodeResultElement.value = 'No se encontró ningún código de barras.';
+                }
+              })
+              .catch(error => {
+                console.error('Error al enviar la imagen al servidor:', error);
+              });
+          }, 'image/jpeg');
+
+          // Realizar la captura de fotograma y envío al servidor cada segundo
+          setTimeout(captureFrameAndSend, 1000);
+        }
+
+        // Iniciar la captura de fotogramas y envío al servidor
+        captureFrameAndSend();
       })
       .catch(function (error) {
         console.error('Error al acceder a la cámara:', error);
