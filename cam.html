@@ -51,7 +51,7 @@ Tarama yap
 
       <!-- Modal footer -->
       <div class="modal-footer">
-        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+        <button type="button" id="btn" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
       </div>
 
     </div>
@@ -86,7 +86,6 @@ Tarama yap
       },
       decoder: {
         readers: [
-          "code_128_reader",
           "ean_reader",
         ],
         debug: {
