@@ -56,34 +56,34 @@
       font-weight: bold;
     }
 
-    #video-camara {
-      position: relative;
-      width: 100%;
-    }
+   #video-camara {
+  position: relative;
+  width: 100%;
+}
 
-    #video-camara video {
-      position: absolute;
-      width: 100%;
-      height: auto;
-      top: 0;
-      left: 0;
-    }
+#video-camara video {
+  position: absolute;
+  width: 100%;
+  height: auto;
+  top: 0;
+  left: 0;
+}
 
-    #video-overlay {
-      position: absolute;
-      top: 10%;
-      left: 10%;
-      width: 80%;
-      height: 80%;
-      background-color: rgba(196, 196, 196, 0.18);
-      pointer-events: none;
-      box-sizing: border-box;
-      border: 2px solid #fe8e14;
-    }
+#video-overlay {
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  width: 80%;
+  height: 80%;
+  background-color: rgba(196, 196, 196, 0.18); /* Cambia el color a claro */
+  pointer-events: none;
+  box-sizing: border-box;
+  border: 2px solid #fe8e14;
+}
 
     canvas {
-      width: 540px !important;
-      height: 220px !important;
+        width: 540px !important;
+        height: 220px !important;
     }
   </style>
 </head>
@@ -112,21 +112,11 @@
     </div>
   </div>
 
-  <script src="https://unpkg.com/quagga"></script>
+ <script src="https://unpkg.com/quagga"></script>
   <script>
-    var scannedCodes = [];
+  var scannedCodes = [];
     var consecutiveCount = 0;
     var currentCode = null;
-
-    function controlL(text) {
-      let newtext = text;
-      newtext = newtext.replace(/\$/g, "L");
-      newtext = newtext.replace(/\@/g, "L");
-      newtext = newtext.replace(/\-/g, "0");
-      newtext = newtext.replace(/\^/g, "0");
-
-      return newtext;
-    }
 
     Quagga.init(
       {
@@ -138,12 +128,13 @@
             facingMode: "environment"
           }
         },
-        decoder: {
-          readers: ["ean_reader"],
-          multiple: false,
-          locate: true,
-          patchSize: "small"
-        }
+       decoder: {
+            readers: ["ean_reader", "codabar_reader"],
+            multiple: false,
+            multipleFrequency:1,
+            locate: true,
+            patchSize: "small"
+          }
       },
       function (err) {
         if (err) {
@@ -167,7 +158,7 @@
           });
 
           // Selección de cámara por defecto
-          var defaultDeviceId = devices[0].deviceId;
+          var defaultDeviceId = devices[1].deviceId;
           select.value = defaultDeviceId;
           startScanner(defaultDeviceId);
         });
@@ -187,10 +178,11 @@
             }
           },
           decoder: {
-            readers: ["ean_reader", "code_128_reader"],
+            readers: ["ean_reader", "codabar_reader"],
             multiple: false,
+            multipleFrequency:1,
             locate: true,
-            patchSize: "medium"
+            patchSize: "small"
           }
         },
         function (err) {
@@ -219,7 +211,7 @@
         if (consecutiveCount >= 10) {
           console.log("Código válido: ", code);
           var resultadoElement = document.querySelector("#resultado");
-          resultadoElement.textContent = controlL(code);
+          resultadoElement.textContent = code;
           Quagga.stop();
 
           var maxCount = 0;
